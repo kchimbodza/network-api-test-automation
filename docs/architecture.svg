@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 322" width="960" height="322" role="img" aria-labelledby="t d">
+  <title id="t">How Network API Test Automation runs</title>
+  <desc id="d">Every push or pull request to main starts a GitHub Actions job on ubuntu-latest: checkout, Python 3.12, pip install from requirements.txt, pytest runs 42 tests, and report.html is uploaded as an artifact even when tests fail. Inside pytest, a fixture resets the in-memory state, the Flask test client sends requests in-process with no server or network, the bearer token check returns 401 when the token is missing or wrong, the Flask API serves six endpoints with JSON errors, and the data is held in memory: 2 devices, 2 alarms and 2 SLA records. Tests by group: health 3, auth 6, devices 10, alarms 11, SLA 8, edge cases 4.</desc>
+  <style>
+    :root { --ink:#1f2937; --sub:#57606a; --line:#d0d7de; --card:#ffffff; --on:#2563eb; --tint:#eff6ff; --ok:#1a7f37; }
+    @media (prefers-color-scheme: dark) {
+      :root { --ink:#e6edf3; --sub:#9198a1; --line:#3d444d; --card:#161b22; --on:#60a5fa; --tint:#0f1d3a; --ok:#3fb950; }
+    }
+    text { font-family: Inter, "Segoe UI", system-ui, -apple-system, Helvetica, Arial, sans-serif; }
+    .lane  { font-size:12px; font-weight:700; fill:var(--sub); letter-spacing:.06em; }
+    .title { font-size:13.5px; font-weight:700; fill:var(--ink); text-anchor:middle; }
+    .sub   { font-size:10.5px; fill:var(--sub); text-anchor:middle; }
+    .ok    { font-size:11px; font-weight:600; fill:var(--ok); text-anchor:middle; }
+    .node  { fill:var(--card); stroke:var(--line); stroke-width:1.5; }
+    .db    { fill:var(--tint); stroke:var(--on); stroke-width:1.5; }
+    .wire  { stroke:var(--line); stroke-width:1.5; fill:none; }
+    .link  { stroke:var(--on); stroke-width:1.5; fill:none; stroke-dasharray:4 6; animation: dash 1.2s linear infinite; }
+    @keyframes dash { to { stroke-dashoffset:-20; } }
+    .head  { fill:var(--line); }
+    .dot   { fill:var(--on); }
+    .t1 { animation: g1 6s infinite ease-in-out; }
+    .t2 { animation: g2 6s infinite ease-in-out; }
+    @keyframes g1 {
+      0%,6%   { transform:translateX(102px); } 18%,24% { transform:translateX(291px); }
+      36%,42% { transform:translateX(480px); } 54%,60% { transform:translateX(669px); }
+      72%,100%{ transform:translateX(858px); }
+    }
+    @keyframes g2 {
+      0%,6%   { transform:translateX(102px); } 18%,24% { transform:translateX(291px); }
+      36%,42% { transform:translateX(480px); } 54%,60% { transform:translateX(669px); }
+      72%,100%{ transform:translateX(858px); }
+    }
+    @media (prefers-reduced-motion: reduce) { .t1, .t2, .link { animation:none; } }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path class="head" d="M0 0 L10 5 L0 10z"/></marker>
+  </defs>
+
+  <!-- Lane 1: CI -->
+  <text class="lane" x="20" y="26">1 · EVERY PUSH OR PULL REQUEST TO MAIN  (.github/workflows/test.yml)</text>
+  <g>
+    <rect class="node" x="20"  y="40" width="164" height="66" rx="10"/>
+    <text class="title" x="102" y="68">Push / PR</text><text class="sub" x="102" y="86">branch main</text>
+    <rect class="node" x="209" y="40" width="164" height="66" rx="10"/>
+    <text class="title" x="291" y="68">Checkout + Python</text><text class="sub" x="291" y="86">3.12 on ubuntu-latest</text>
+    <rect class="node" x="398" y="40" width="164" height="66" rx="10"/>
+    <text class="title" x="480" y="68">pip install</text><text class="sub" x="480" y="86">requirements.txt</text>
+    <rect class="node" x="587" y="40" width="164" height="66" rx="10"/>
+    <text class="title" x="669" y="64">pytest</text><text class="ok" x="669" y="82">42 tests</text><text class="sub" x="669" y="97">PYTHONPATH=. pytest</text>
+    <rect class="db"   x="776" y="40" width="164" height="66" rx="10"/>
+    <text class="title" x="858" y="68">report.html</text><text class="sub" x="858" y="86">artifact, uploaded always</text>
+    <path class="wire" d="M184 73 H207" marker-end="url(#a)"/>
+    <path class="wire" d="M373 73 H396" marker-end="url(#a)"/>
+    <path class="wire" d="M562 73 H585" marker-end="url(#a)"/>
+    <path class="wire" d="M751 73 H774" marker-end="url(#a)"/>
+    <circle class="dot t1" cx="0" cy="40" r="5"/>
+  </g>
+
+  <!-- link: pytest runs lane 2 -->
+  <path class="link" d="M669 106 V140 H102 V184"/>
+  <text class="sub" x="385" y="133">inside the pytest step, for each test</text>
+
+  <!-- Lane 2: what a test exercises -->
+  <text class="lane" x="20" y="170">2 · WHAT EACH TEST EXERCISES  (tests/test_api.py → app/api.py)</text>
+  <g>
+    <rect class="node" x="20"  y="184" width="164" height="66" rx="10"/>
+    <text class="title" x="102" y="212">pytest fixture</text><text class="sub" x="102" y="230">resets alarms + devices</text>
+    <rect class="node" x="209" y="184" width="164" height="66" rx="10"/>
+    <text class="title" x="291" y="212">Flask test client</text><text class="sub" x="291" y="230">in-process, no server</text>
+    <rect class="node" x="398" y="184" width="164" height="66" rx="10"/>
+    <text class="title" x="480" y="212">Bearer token check</text><text class="sub" x="480" y="230">401 if missing or wrong</text>
+    <rect class="node" x="587" y="184" width="164" height="66" rx="10"/>
+    <text class="title" x="669" y="212">Flask API</text><text class="sub" x="669" y="230">6 routes · JSON errors</text>
+    <rect class="db"   x="776" y="184" width="164" height="66" rx="10"/>
+    <text class="title" x="858" y="208">In-memory data</text><text class="sub" x="858" y="226">2 devices · 2 alarms</text><text class="sub" x="858" y="240">2 SLA records</text>
+    <path class="wire" d="M184 217 H207" marker-end="url(#a)"/>
+    <path class="wire" d="M373 217 H396" marker-end="url(#a)"/>
+    <path class="wire" d="M562 217 H585" marker-end="url(#a)"/>
+    <path class="wire" d="M751 217 H774" marker-end="url(#a)"/>
+    <circle class="dot t2" cx="0" cy="184" r="5"/>
+  </g>
+  <text class="sub" x="480" y="286">Tests by group: health 3 · auth 6 · devices 10 · alarms 11 · SLA 8 · edge cases 4  =  42</text>
+  <text class="sub" x="480" y="306">Each test checks a status code (200, 401, 404, 405), a field, a value, or that only the target alarm changed.</text>
+</svg>
